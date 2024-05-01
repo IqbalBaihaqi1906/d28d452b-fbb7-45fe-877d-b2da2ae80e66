@@ -17,3 +17,11 @@ export interface IUpdateEmployee {
   phone?: string;
   email?: string;
 }
+
+export interface IUpdateEmployeeWithId extends IUpdateEmployee {
+  id: number;
+}
+
+export interface IUpdateManyEmployees {
+  employees: IUpdateEmployeeWithId[];
+}

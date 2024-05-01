@@ -17,6 +17,7 @@ import { EmployeeService } from './employee.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { CreateManyEmployeeDto } from './dto/create-many-employee.dto';
+import { UpdateManyEmployeeDto } from './dto/update-many-employee.dto';
 
 @Controller('employees')
 export class EmployeeController {
@@ -66,6 +67,20 @@ export class EmployeeController {
       message: 'Employees retrieved successfully',
       status: HttpStatus.OK,
       data: employees,
+    };
+  }
+
+  @Patch('/many')
+  @UsePipes(new ValidationPipe())
+  async updateMany(@Body() updateManyEmployeeDto: UpdateManyEmployeeDto) {
+    const updatedEmployees = await this.employeeService.updateMany(
+      updateManyEmployeeDto,
+    );
+
+    return {
+      message: 'Employees updated successfully',
+      status: HttpStatus.OK,
+      data: updatedEmployees.map((employee) => employee.id),
     };
   }
 

@@ -3,8 +3,9 @@ import {
   ICreateEmployee,
   ICreateManyEmployees,
   IUpdateEmployee,
+  IUpdateManyEmployees,
 } from './interfaces/employee-interfaces';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Employee } from './entities/employee.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -61,6 +62,27 @@ export class EmployeeService {
     Object.assign(employee, updateEmployeeParam);
 
     return this.employeeRepository.save(employee);
+  }
+
+  async updateMany(updateManyParam: IUpdateManyEmployees) {
+    const employeeIds = updateManyParam?.employees.map((item) => item.id);
+
+    const employees = await this.employeeRepository.find({
+      where: { id: In(employeeIds) },
+    });
+
+    if (employees.length !== updateManyParam.employees.length) {
+      throw new NotFoundException('Employee not found');
+    }
+
+    employees.forEach((employee) => {
+      const updateEmployee = updateManyParam.employees.find(
+        (e) => e.id === employee.id,
+      );
+      Object.assign(employee, updateEmployee);
+    });
+
+    return this.employeeRepository.save(employees);
   }
 
   remove(id: number) {
