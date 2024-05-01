@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ICreateEmployee,
   ICreateManyEmployees,
@@ -17,6 +21,14 @@ export class EmployeeService {
   ) {}
 
   async create(createEmployeParam: ICreateEmployee) {
+    const isEmailExist = await this.employeeRepository.findOne({
+      where: { email: createEmployeParam.email },
+    });
+
+    if (isEmailExist) {
+      throw new BadRequestException('Email already exist');
+    }
+
     const newEmployee = await this.employeeRepository.save(createEmployeParam);
     return newEmployee;
   }

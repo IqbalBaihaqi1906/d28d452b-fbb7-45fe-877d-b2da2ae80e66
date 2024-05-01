@@ -29,12 +29,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
       `Exception Messafe: ${exception.message}, stack: ${exception.stack}`,
     );
 
+    const path = httpAdapter.getRequestUrl(ctx.getRequest());
+
     const responseBody = {
-      statusCode: httpStatus,
       timestamp: new Date().toISOString(),
-      path: httpAdapter.getRequestUrl(ctx.getRequest()),
-      response: exception.response,
-      message: exception.message,
+      path: path,
+      response: exception.response || 'Internal server error',
+      message: exception.response
+        ? `Error at ${path} endpoint`
+        : exception.message,
     };
 
     httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);
