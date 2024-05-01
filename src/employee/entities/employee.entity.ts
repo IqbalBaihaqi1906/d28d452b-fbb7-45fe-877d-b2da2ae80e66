@@ -8,6 +8,9 @@ export class Employee {
   @Column({ length: 50 })
   firstName: string;
 
+  @Column({ length: 50 })
+  lastName: string;
+
   @Column({ length: 25 })
   position: string;
 

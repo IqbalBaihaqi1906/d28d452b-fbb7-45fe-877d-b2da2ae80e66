@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   ICreateEmployee,
   ICreateManyEmployees,
+  IUpdateEmployee,
 } from './interfaces/employee-interfaces';
 import { Repository } from 'typeorm';
 import { Employee } from './entities/employee.entity';
@@ -50,8 +50,17 @@ export class EmployeeService {
     return `This action returns a #${id} employee`;
   }
 
-  update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
-    return `${id}, ${updateEmployeeDto}`;
+  async updateById(id: number, updateEmployeeParam: IUpdateEmployee) {
+    const employee = await this.employeeRepository.findOne({
+      where: { id },
+    });
+    if (!employee) {
+      throw new NotFoundException('Employee not found');
+    }
+
+    Object.assign(employee, updateEmployeeParam);
+
+    return this.employeeRepository.save(employee);
   }
 
   remove(id: number) {

@@ -62,20 +62,29 @@ export class EmployeeController {
       limit,
     );
 
-    return employees;
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.employeeService.findOne(+id);
+    return {
+      message: 'Employees retrieved successfully',
+      status: HttpStatus.OK,
+      data: employees,
+    };
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
+  @UsePipes(new ValidationPipe())
+  async update(
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateEmployeeDto: UpdateEmployeeDto,
   ) {
-    return this.employeeService.update(+id, updateEmployeeDto);
+    const updatedEmployee = await this.employeeService.updateById(
+      id,
+      updateEmployeeDto,
+    );
+
+    return {
+      message: 'Employee updated successfully',
+      status: HttpStatus.OK,
+      data: updatedEmployee.id,
+    };
   }
 
   @Delete(':id')
