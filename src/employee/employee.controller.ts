@@ -103,7 +103,13 @@ export class EmployeeController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.employeeService.remove(+id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    await this.employeeService.deleteById(id);
+
+    return {
+      message: 'Employee deleted successfully',
+      status: HttpStatus.OK,
+      deletedEmployeeId: id,
+    };
   }
 }

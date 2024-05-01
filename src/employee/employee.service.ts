@@ -47,17 +47,19 @@ export class EmployeeService {
     return { data, total, totalPages, perPage };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} employee`;
-  }
-
-  async updateById(id: number, updateEmployeeParam: IUpdateEmployee) {
+  async findById(id: number) {
     const employee = await this.employeeRepository.findOne({
       where: { id },
     });
     if (!employee) {
       throw new NotFoundException('Employee not found');
     }
+
+    return employee;
+  }
+
+  async updateById(id: number, updateEmployeeParam: IUpdateEmployee) {
+    const employee = await this.findById(id);
 
     Object.assign(employee, updateEmployeeParam);
 
@@ -85,7 +87,14 @@ export class EmployeeService {
     return this.employeeRepository.save(employees);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} employee`;
+  async deleteById(id: number) {
+    const employee = await this.findById(id);
+
+    const result = await this.employeeRepository.delete(employee.id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Employee with ID ${id} not found`);
+    }
+
+    return result;
   }
 }
