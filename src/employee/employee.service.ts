@@ -27,8 +27,23 @@ export class EmployeeService {
     return newEmployees;
   }
 
-  findAll() {
-    return `This action returns all employee`;
+  async findAll(sortBy?: string, sortOrder?: string, page = 1, limit = 10) {
+    const conditions = {
+      take: limit,
+      skip: (page - 1) * limit,
+    };
+    if (sortBy && sortOrder) {
+      conditions['order'] = { [sortBy]: sortOrder };
+    }
+
+    const [data, total] =
+      await this.employeeRepository.findAndCount(conditions);
+
+    const totalPages = Math.ceil(total / limit);
+
+    const perPage = limit;
+
+    return { data, total, totalPages, perPage };
   }
 
   findOne(id: number) {
