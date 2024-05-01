@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import { ICreateEmployee } from './interfaces/employee-interfaces';
+import {
+  ICreateEmployee,
+  ICreateManyEmployees,
+} from './interfaces/employee-interfaces';
 import { Repository } from 'typeorm';
 import { Employee } from './entities/employee.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,6 +18,13 @@ export class EmployeeService {
   async create(createEmployeParam: ICreateEmployee) {
     const newEmployee = await this.employeeRepository.save(createEmployeParam);
     return newEmployee;
+  }
+
+  async createMany(createManyParam: ICreateManyEmployees) {
+    const newEmployees = await this.employeeRepository.save(
+      createManyParam.employees,
+    );
+    return newEmployees;
   }
 
   findAll() {

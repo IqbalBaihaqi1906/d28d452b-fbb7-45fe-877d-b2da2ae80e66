@@ -5,3 +5,7 @@ export interface ICreateEmployee {
   phone: string;
   email: string;
 }
+
+export interface ICreateManyEmployees {
+  employees: ICreateEmployee[];
+}
