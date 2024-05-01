@@ -18,11 +18,40 @@ import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { CreateManyEmployeeDto } from './dto/create-many-employee.dto';
 import { UpdateManyEmployeeDto } from './dto/update-many-employee.dto';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  createEmployeeRequestBody,
+  createManyApiBody,
+  updateEmployeeRequestBody,
+  updateManyEmployeeRequestBody,
+} from './api-doc/api-request';
+import {
+  badRequestResponse,
+  createEmployeeOkResponse,
+  createManyEmployeeOkResponse,
+  deleteEmployeeOkResponse,
+  employeeNotFoundResponse,
+  getEmployeeOkResponse,
+  internalServerError,
+  updateEmployeeOkResponse,
+  updateManyEmployeeOkResponse,
+} from './api-doc/api.response';
 
+@ApiTags('Employees')
 @Controller('employees')
 export class EmployeeController {
   constructor(private readonly employeeService: EmployeeService) {}
 
+  @ApiResponse(internalServerError)
+  @ApiBody(createEmployeeRequestBody)
+  @ApiResponse(createEmployeeOkResponse)
+  @ApiResponse(badRequestResponse)
   @Post()
   @UsePipes(new ValidationPipe())
   async create(@Body() createEmployeeDto: CreateEmployeeDto) {
@@ -35,6 +64,10 @@ export class EmployeeController {
     };
   }
 
+  @ApiBody(createManyApiBody)
+  @ApiResponse(createManyEmployeeOkResponse)
+  @ApiResponse(badRequestResponse)
+  @ApiResponse(internalServerError)
   @Post('many')
   @UsePipes(new ValidationPipe())
   async createMany(@Body() createManyEmployeesDto: CreateManyEmployeeDto) {
@@ -45,11 +78,18 @@ export class EmployeeController {
     return {
       message: 'Employee created successfully',
       status: HttpStatus.CREATED,
-      newEmployees,
+      newEmployees: newEmployees.map((employee) => employee.id),
     };
   }
 
+  @ApiQuery({ name: 'sortBy', required: false })
+  @ApiQuery({ name: 'sortOrder', required: false })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
   @Get()
+  @ApiResponse(getEmployeeOkResponse)
+  @ApiResponse(badRequestResponse)
+  @ApiResponse(internalServerError)
   async findAll(
     @Query('sortBy') sortBy?: string,
     @Query('sortOrder') sortOrder?: string,
@@ -66,10 +106,23 @@ export class EmployeeController {
     return {
       message: 'Employees retrieved successfully',
       status: HttpStatus.OK,
-      data: employees,
+      data: {
+        employees: employees.data,
+        total: employees.total,
+        totalPages: employees.totalPages,
+        perPage: employees.perPage,
+      },
     };
   }
 
+  @ApiBody(updateManyEmployeeRequestBody)
+  @ApiOperation({
+    description:
+      'All the parameters except id are optional. You can update one or more fields of the employee',
+  })
+  @ApiResponse(badRequestResponse)
+  @ApiResponse(internalServerError)
+  @ApiResponse(updateManyEmployeeOkResponse)
   @Patch('/many')
   @UsePipes(new ValidationPipe())
   async updateMany(@Body() updateManyEmployeeDto: UpdateManyEmployeeDto) {
@@ -84,6 +137,15 @@ export class EmployeeController {
     };
   }
 
+  @ApiOperation({
+    description:
+      'All the parameters except id are optional. You can update one or more fields of the employee',
+  })
+  @ApiBody(updateEmployeeRequestBody)
+  @ApiResponse(badRequestResponse)
+  @ApiResponse(internalServerError)
+  @ApiResponse(updateEmployeeOkResponse)
+  @ApiResponse(employeeNotFoundResponse)
   @Patch(':id')
   @UsePipes(new ValidationPipe())
   async update(
@@ -102,6 +164,10 @@ export class EmployeeController {
     };
   }
 
+  @ApiResponse(badRequestResponse)
+  @ApiResponse(internalServerError)
+  @ApiResponse(deleteEmployeeOkResponse)
+  @ApiResponse(employeeNotFoundResponse)
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
     await this.employeeService.deleteById(id);

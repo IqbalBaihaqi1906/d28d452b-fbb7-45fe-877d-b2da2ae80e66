@@ -86,7 +86,7 @@ export class EmployeeService {
     });
 
     if (employees.length !== updateManyParam.employees.length) {
-      throw new NotFoundException('Employee not found');
+      throw new NotFoundException('One of the employee not found');
     }
 
     employees.forEach((employee) => {
